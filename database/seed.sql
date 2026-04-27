@@ -1,55 +1,140 @@
-DROP TABLE IF EXISTS usage_analytics    CASCADE;
-DROP TABLE IF EXISTS approval_records   CASCADE;
-DROP TABLE IF EXISTS approved_bookings  CASCADE;
-DROP TABLE IF EXISTS booking_requests   CASCADE;
-DROP TABLE IF EXISTS equipment          CASCADE;
-DROP TABLE IF EXISTS facilities         CASCADE;
-DROP TABLE IF EXISTS users              CASCADE;
-DROP TABLE IF EXISTS roles              CASCADE;
-DROP TABLE IF EXISTS departments        CASCADE;
-
-
 -- ============================================================
 -- 1. DEPARTMENTS
 -- ============================================================
 
-CREATE TABLE departments (
-    department_id   SERIAL          PRIMARY KEY,
-    dept_name       VARCHAR(100)    NOT NULL UNIQUE,
-    dept_code       VARCHAR(10)     NOT NULL UNIQUE,
-    created_at      TIMESTAMP       DEFAULT NOW()
-);
+INSERT INTO departments (dept_name, dept_code) VALUES
+('Computer Science',        'CS'),
+('Electrical Engineering',  'EE'),
+('Mechanical Engineering',  'ME'),
+('Chemical Engineering',    'CHE'),
+('Materials Engineering',   'MSE'),
+('Management Sciences',     'MGT');
 
 
 -- ============================================================
 -- 2. ROLES
 -- ============================================================
 
-CREATE TABLE roles (
-    role_id         SERIAL          PRIMARY KEY,
-    role_name       VARCHAR(50)     NOT NULL UNIQUE,
-    -- 'Admin', 'Faculty', 'Student', 'Society Head'
-    permissions     TEXT,
-    created_at      TIMESTAMP       DEFAULT NOW()
-);
+INSERT INTO roles (role_name, permissions) VALUES
+('Admin',           'full_access'),
+('Faculty',         'book_facility, view_analytics'),
+('Student',         'book_facility'),
+('Society Head',    'book_facility, manage_society_bookings');
 
 
 -- ============================================================
 -- 3. USERS
+-- password hash = bcrypt of 'GIK@12345'
 -- ============================================================
 
-CREATE TABLE users (
-    user_id         SERIAL          PRIMARY KEY,
-    full_name       VARCHAR(100)    NOT NULL,
-    email           VARCHAR(100)    NOT NULL UNIQUE,
-    password_hash   VARCHAR(255)    NOT NULL,
-    role_id         INT             NOT NULL REFERENCES roles(role_id)          ON DELETE RESTRICT,
-    department_id   INT             REFERENCES departments(department_id)        ON DELETE SET NULL,
-    reg_number      VARCHAR(20)     UNIQUE,         -- for students only
-    is_active       BOOLEAN         DEFAULT TRUE,
-    created_by      INT             REFERENCES users(user_id)                   ON DELETE SET NULL,
-    -- self-referencing: which admin created this user
-    created_at      TIMESTAMP       DEFAULT NOW()
+INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_number, is_active, created_by) VALUES
+
+-- Admin (created_by NULL as he is the root user)
+(
+    'System Admin',
+    'admin@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Admin'),
+    NULL,
+    NULL,
+    TRUE,
+    NULL
+),
+
+-- Faculty
+(
+    'Dr. Ahmed Khan',
+    'ahmed.khan@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Faculty'),
+    (SELECT department_id FROM departments WHERE dept_code = 'CS'),
+    NULL,
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
+),
+(
+    'Dr. Sara Malik',
+    'sara.malik@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Faculty'),
+    (SELECT department_id FROM departments WHERE dept_code = 'EE'),
+    NULL,
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
+),
+(
+    'Dr. Usman Tariq',
+    'usman.tariq@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Faculty'),
+    (SELECT department_id FROM departments WHERE dept_code = 'ME'),
+    NULL,
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
+),
+
+-- Students
+(
+    'Reyan Kashif',
+    'reyan.kashif@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Student'),
+    (SELECT department_id FROM departments WHERE dept_code = 'CS'),
+    '2024538',
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
+),
+(
+    'Ghazali Khan',
+    'ghazali.khan@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Student'),
+    (SELECT department_id FROM departments WHERE dept_code = 'CS'),
+    '2024380',
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
+),
+(
+    'Sohaib Bin Tausif',
+    'sohaib.tausif@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Student'),
+    (SELECT department_id FROM departments WHERE dept_code = 'CS'),
+    '2024595',
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
+),
+(
+    'Ali Hassan',
+    'ali.hassan@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Student'),
+    (SELECT department_id FROM departments WHERE dept_code = 'EE'),
+    '2023112',
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
+),
+(
+    'Zara Ahmed',
+    'zara.ahmed@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Student'),
+    (SELECT department_id FROM departments WHERE dept_code = 'ME'),
+    '2023245',
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
+),
+
+-- Society Head
+(
+    'Hamza Rauf',
+    'hamza.rauf@giki.edu.pk',
+    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    (SELECT role_id FROM roles WHERE role_name = 'Society Head'),
+    (SELECT department_id FROM departments WHERE dept_code = 'CS'),
+    '2022401',
+    TRUE,
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk')
 );
 
 
@@ -57,70 +142,270 @@ CREATE TABLE users (
 -- 4. FACILITIES
 -- ============================================================
 
-CREATE TABLE facilities (
-    facility_id     SERIAL          PRIMARY KEY,
-    facility_name   VARCHAR(100)    NOT NULL,
-    facility_type   VARCHAR(50)     NOT NULL,
-    -- 'Classroom', 'Lab', 'Seminar Hall', 'Sports Ground'
-    capacity        INT             NOT NULL CHECK (capacity > 0),
-    location        VARCHAR(100),
-    department_id   INT             REFERENCES departments(department_id)        ON DELETE SET NULL,
-    is_available    BOOLEAN         DEFAULT TRUE,
-    created_at      TIMESTAMP       DEFAULT NOW()
-);
+INSERT INTO facilities (facility_name, facility_type, capacity, location, department_id, is_available) VALUES
+
+-- Labs
+('Cyber Lab',                   'Lab',          40,     'Academic Block',   (SELECT department_id FROM departments WHERE dept_code = 'CS'),    TRUE),
+('Software Engineering Lab',    'Lab',          40,     'CS Faculty',       (SELECT department_id FROM departments WHERE dept_code = 'CS'),    TRUE),
+('Data Analytics Lab',          'Lab',          40,     'Academic Block',   (SELECT department_id FROM departments WHERE dept_code = 'CS'),    TRUE),
+('Artificial Intelligence Lab', 'Lab',          40,     'Academic Block',   (SELECT department_id FROM departments WHERE dept_code = 'CS'),    TRUE),
+
+-- Lecture Halls
+('LH-1',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-2',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-3',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-4',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-5',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-6',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-7',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-8',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-9',    'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-10',   'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-11',   'Classroom', 70, 'NAB', NULL, TRUE),
+('LH-12',   'Classroom', 70, 'NAB', NULL, TRUE),
+
+-- Main Lecture Halls
+('MLH-1',   'Classroom', 150, 'NAB', NULL, TRUE),
+('MLH-2',   'Classroom', 150, 'NAB', NULL, TRUE),
+('MLH-3',   'Classroom', 150, 'NAB', NULL, TRUE),
+
+-- Seminar Hall
+('CS Faculty Seminar Hall', 'Seminar Hall', 80, 'CS Faculty', (SELECT department_id FROM departments WHERE dept_code = 'CS'), TRUE),
+
+-- Sports
+('Cricket Ground',      'Sports Ground', 200,   'Sports Complex',   NULL, TRUE),
+('Football Ground',     'Sports Ground', 200,   'Sports Complex',   NULL, TRUE),
+('Tennis Court',        'Sports Ground', 20,    'Sports Complex',   NULL, TRUE),
+('Basketball Court',    'Sports Ground', 30,    'Sports Complex',   NULL, TRUE),
+('Futsal Court',        'Sports Ground', 30,    'Sports Complex',   NULL, TRUE),
+
+-- Auditorium
+('Aga Khan Auditorium', 'Auditorium', 1000, 'Main Campus', NULL, TRUE);
 
 
 -- ============================================================
--- 5. EQUIPMENT  (informational - what a facility has)
+-- 5. EQUIPMENT
 -- ============================================================
 
-CREATE TABLE equipment (
-    equipment_id    SERIAL          PRIMARY KEY,
-    equipment_name  VARCHAR(100)    NOT NULL,
-    equipment_type  VARCHAR(50),
-    -- 'Projector', 'Whiteboard', 'AC', 'Computer', 'Speaker'
-    quantity        INT             NOT NULL DEFAULT 1 CHECK (quantity >= 0),
-    facility_id     INT             NOT NULL REFERENCES facilities(facility_id)  ON DELETE CASCADE,
-    condition       VARCHAR(20)     DEFAULT 'Good',
-    -- 'Good', 'Needs Repair', 'Out of Service'
-    created_at      TIMESTAMP       DEFAULT NOW()
-);
+INSERT INTO equipment (equipment_name, equipment_type, quantity, facility_id, condition) VALUES
+
+-- Cyber Lab
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'Cyber Lab'),                     'Good'),
+('Computers',   'Computer',     40, (SELECT facility_id FROM facilities WHERE facility_name = 'Cyber Lab'),                     'Good'),
+('AC Unit',     'AC',           2,  (SELECT facility_id FROM facilities WHERE facility_name = 'Cyber Lab'),                     'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'Cyber Lab'),                     'Good'),
+
+-- SE Lab
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'Software Engineering Lab'),      'Good'),
+('Computers',   'Computer',     40, (SELECT facility_id FROM facilities WHERE facility_name = 'Software Engineering Lab'),      'Good'),
+('AC Unit',     'AC',           2,  (SELECT facility_id FROM facilities WHERE facility_name = 'Software Engineering Lab'),      'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'Software Engineering Lab'),      'Good'),
+
+-- Data Analytics Lab
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'Data Analytics Lab'),            'Good'),
+('Computers',   'Computer',     40, (SELECT facility_id FROM facilities WHERE facility_name = 'Data Analytics Lab'),            'Good'),
+('AC Unit',     'AC',           2,  (SELECT facility_id FROM facilities WHERE facility_name = 'Data Analytics Lab'),            'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'Data Analytics Lab'),            'Good'),
+
+-- AI Lab
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'Artificial Intelligence Lab'),   'Good'),
+('Computers',   'Computer',     40, (SELECT facility_id FROM facilities WHERE facility_name = 'Artificial Intelligence Lab'),   'Good'),
+('AC Unit',     'AC',           2,  (SELECT facility_id FROM facilities WHERE facility_name = 'Artificial Intelligence Lab'),   'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'Artificial Intelligence Lab'),   'Good'),
+
+-- LH-1 to LH-12 (Projector + Whiteboard + AC each)
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-1'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-1'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-1'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-2'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-2'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-2'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-3'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-3'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-3'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-4'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-4'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-4'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-5'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-5'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-5'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-6'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-6'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-6'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-7'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-7'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-7'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-8'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-8'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-8'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-9'),  'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-9'),  'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-9'),  'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-10'), 'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-10'), 'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-10'), 'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-11'), 'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-11'), 'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-11'), 'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-12'), 'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-12'), 'Good'),
+('AC Unit',     'AC',           1,  (SELECT facility_id FROM facilities WHERE facility_name = 'LH-12'), 'Good'),
+
+-- MLH-1 to MLH-3 (Projector + Whiteboard + AC + Speaker)
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-1'), 'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-1'), 'Good'),
+('AC Unit',     'AC',           2,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-1'), 'Good'),
+('Speaker',     'Speaker',      2,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-1'), 'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-2'), 'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-2'), 'Good'),
+('AC Unit',     'AC',           2,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-2'), 'Good'),
+('Speaker',     'Speaker',      2,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-2'), 'Good'),
+
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-3'), 'Good'),
+('Whiteboard',  'Whiteboard',   1,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-3'), 'Good'),
+('AC Unit',     'AC',           2,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-3'), 'Good'),
+('Speaker',     'Speaker',      2,  (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-3'), 'Good'),
+
+-- CS Seminar Hall
+('Projector',   'Projector',    1,  (SELECT facility_id FROM facilities WHERE facility_name = 'CS Faculty Seminar Hall'),   'Good'),
+('Whiteboard',  'Whiteboard',   2,  (SELECT facility_id FROM facilities WHERE facility_name = 'CS Faculty Seminar Hall'),   'Good'),
+('AC Unit',     'AC',           2,  (SELECT facility_id FROM facilities WHERE facility_name = 'CS Faculty Seminar Hall'),   'Good'),
+('Speaker',     'Speaker',      2,  (SELECT facility_id FROM facilities WHERE facility_name = 'CS Faculty Seminar Hall'),   'Good'),
+
+-- Aga Khan Auditorium
+('Projector',   'Projector',    2,  (SELECT facility_id FROM facilities WHERE facility_name = 'Aga Khan Auditorium'),   'Good'),
+('AC Unit',     'AC',           6,  (SELECT facility_id FROM facilities WHERE facility_name = 'Aga Khan Auditorium'),   'Good'),
+('Speaker',     'Speaker',      8,  (SELECT facility_id FROM facilities WHERE facility_name = 'Aga Khan Auditorium'),   'Good');
 
 
 -- ============================================================
 -- 6. BOOKING REQUESTS
 -- ============================================================
 
-CREATE TABLE booking_requests (
-    request_id      SERIAL          PRIMARY KEY,
-    user_id         INT             NOT NULL REFERENCES users(user_id)           ON DELETE CASCADE,
-    facility_id     INT             NOT NULL REFERENCES facilities(facility_id)  ON DELETE CASCADE,
-    start_time      TIMESTAMP       NOT NULL,
-    end_time        TIMESTAMP       NOT NULL,
-    purpose         TEXT            NOT NULL,
-    status          VARCHAR(20)     DEFAULT 'Pending',
-    -- 'Pending', 'Approved', 'Rejected', 'Cancelled'
-    attendees_count INT             CHECK (attendees_count > 0),
-    created_at      TIMESTAMP       DEFAULT NOW(),
+INSERT INTO booking_requests (user_id, facility_id, start_time, end_time, purpose, status, attendees_count) VALUES
 
-    CONSTRAINT chk_valid_time CHECK (start_time < end_time)
+-- Approved bookings
+(
+    (SELECT user_id FROM users WHERE email = 'ahmed.khan@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Cyber Lab'),
+    '2026-04-14 09:00:00', '2026-04-14 11:00:00',
+    'CS232 Lab Session', 'Approved', 35
+),
+(
+    (SELECT user_id FROM users WHERE email = 'sara.malik@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-1'),
+    '2026-04-14 11:00:00', '2026-04-14 13:00:00',
+    'EE301 Lecture', 'Approved', 120
+),
+(
+    (SELECT user_id FROM users WHERE email = 'reyan.kashif@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Data Analytics Lab'),
+    '2026-04-15 14:00:00', '2026-04-15 16:00:00',
+    'Final Year Project Meeting', 'Approved', 10
+),
+(
+    (SELECT user_id FROM users WHERE email = 'hamza.rauf@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Aga Khan Auditorium'),
+    '2026-04-20 17:00:00', '2026-04-20 21:00:00',
+    'GDSC GIK Annual Tech Fest', 'Approved', 800
+),
+(
+    (SELECT user_id FROM users WHERE email = 'usman.tariq@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'LH-5'),
+    '2026-04-16 08:00:00', '2026-04-16 10:00:00',
+    'ME201 Lecture', 'Approved', 60
+),
+
+-- Pending bookings
+(
+    (SELECT user_id FROM users WHERE email = 'ghazali.khan@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'CS Faculty Seminar Hall'),
+    '2026-04-17 10:00:00', '2026-04-17 12:00:00',
+    'Database Project Presentation Practice', 'Pending', 20
+),
+(
+    (SELECT user_id FROM users WHERE email = 'sohaib.tausif@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Artificial Intelligence Lab'),
+    '2026-04-18 13:00:00', '2026-04-18 15:00:00',
+    'AI Course Project Demo', 'Pending', 15
+),
+(
+    (SELECT user_id FROM users WHERE email = 'zara.ahmed@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Football Ground'),
+    '2026-04-19 15:00:00', '2026-04-19 17:00:00',
+    'Inter-department Football Match', 'Pending', 30
+),
+
+-- Rejected bookings
+(
+    (SELECT user_id FROM users WHERE email = 'ali.hassan@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Aga Khan Auditorium'),
+    '2026-04-14 18:00:00', '2026-04-14 22:00:00',
+    'Farewell Party', 'Rejected', 400
+),
+(
+    (SELECT user_id FROM users WHERE email = 'reyan.kashif@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-2'),
+    '2026-04-15 09:00:00', '2026-04-15 11:00:00',
+    'Study Group Session', 'Rejected', 140
+),
+
+-- Cancelled booking
+(
+    (SELECT user_id FROM users WHERE email = 'hamza.rauf@giki.edu.pk'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Basketball Court'),
+    '2026-04-13 16:00:00', '2026-04-13 18:00:00',
+    'GDSC Sports Event', 'Cancelled', 25
 );
 
 
 -- ============================================================
 -- 7. APPROVED BOOKINGS
+-- (Only for requests with status = 'Approved')
 -- ============================================================
 
-CREATE TABLE approved_bookings (
-    booking_id      SERIAL          PRIMARY KEY,
-    request_id      INT             NOT NULL UNIQUE REFERENCES booking_requests(request_id) ON DELETE CASCADE,
-    facility_id     INT             NOT NULL REFERENCES facilities(facility_id)             ON DELETE CASCADE,
-    user_id         INT             NOT NULL REFERENCES users(user_id)                      ON DELETE CASCADE,
-    start_time      TIMESTAMP       NOT NULL,
-    end_time        TIMESTAMP       NOT NULL,
-    approved_at     TIMESTAMP       DEFAULT NOW(),
-
-    CONSTRAINT chk_approved_time CHECK (start_time < end_time)
+INSERT INTO approved_bookings (request_id, facility_id, user_id, start_time, end_time) VALUES
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'CS232 Lab Session'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Cyber Lab'),
+    (SELECT user_id FROM users WHERE email = 'ahmed.khan@giki.edu.pk'),
+    '2026-04-14 09:00:00', '2026-04-14 11:00:00'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'EE301 Lecture'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-1'),
+    (SELECT user_id FROM users WHERE email = 'sara.malik@giki.edu.pk'),
+    '2026-04-14 11:00:00', '2026-04-14 13:00:00'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'Final Year Project Meeting'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Data Analytics Lab'),
+    (SELECT user_id FROM users WHERE email = 'reyan.kashif@giki.edu.pk'),
+    '2026-04-15 14:00:00', '2026-04-15 16:00:00'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'GDSC GIK Annual Tech Fest'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Aga Khan Auditorium'),
+    (SELECT user_id FROM users WHERE email = 'hamza.rauf@giki.edu.pk'),
+    '2026-04-20 17:00:00', '2026-04-20 21:00:00'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'ME201 Lecture'),
+    (SELECT facility_id FROM facilities WHERE facility_name = 'LH-5'),
+    (SELECT user_id FROM users WHERE email = 'usman.tariq@giki.edu.pk'),
+    '2026-04-16 08:00:00', '2026-04-16 10:00:00'
 );
 
 
@@ -128,210 +413,87 @@ CREATE TABLE approved_bookings (
 -- 8. APPROVAL RECORDS
 -- ============================================================
 
-CREATE TABLE approval_records (
-    approval_id     SERIAL          PRIMARY KEY,
-    request_id      INT             NOT NULL REFERENCES booking_requests(request_id) ON DELETE CASCADE,
-    admin_id        INT             NOT NULL REFERENCES users(user_id)               ON DELETE RESTRICT,
-    action          VARCHAR(20)     NOT NULL,
-    -- 'Approved', 'Rejected'
-    remarks         TEXT,
-    action_taken_at TIMESTAMP       DEFAULT NOW(),
+INSERT INTO approval_records (request_id, admin_id, action, remarks) VALUES
 
-    CONSTRAINT chk_action CHECK (action IN ('Approved', 'Rejected'))
+-- Approved
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'CS232 Lab Session'),
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk'),
+    'Approved', 'Regular faculty session, approved.'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'EE301 Lecture'),
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk'),
+    'Approved', 'Regular faculty session, approved.'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'Final Year Project Meeting'),
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk'),
+    'Approved', 'FYP meeting approved.'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'GDSC GIK Annual Tech Fest'),
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk'),
+    'Approved', 'Society event approved by admin.'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'ME201 Lecture'),
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk'),
+    'Approved', 'Regular faculty session, approved.'
+),
+
+-- Rejected
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'Farewell Party'),
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk'),
+    'Rejected', 'Auditorium reserved for official events only. Personal events not permitted.'
+),
+(
+    (SELECT request_id FROM booking_requests WHERE purpose = 'Study Group Session'),
+    (SELECT user_id FROM users WHERE email = 'admin@giki.edu.pk'),
+    'Rejected', 'MLH-2 capacity exceeds requirement. Please book a smaller facility.'
 );
 
 
 -- ============================================================
 -- 9. USAGE ANALYTICS
+-- (Manually inserted for approved bookings for demonstration)
+-- In production this is handled by the trigger automatically
 -- ============================================================
 
-CREATE TABLE usage_analytics (
-    analytics_id        SERIAL      PRIMARY KEY,
-    facility_id         INT         NOT NULL REFERENCES facilities(facility_id)      ON DELETE CASCADE,
-    booking_id          INT         NOT NULL REFERENCES approved_bookings(booking_id) ON DELETE CASCADE,
-    date                DATE        NOT NULL,
-    hour_of_day         INT         CHECK (hour_of_day BETWEEN 0 AND 23),
-    day_of_week         VARCHAR(10),
-    -- 'Monday', 'Tuesday', etc.
-    duration_minutes    INT         CHECK (duration_minutes > 0),
-    department_id       INT         REFERENCES departments(department_id)            ON DELETE SET NULL,
-    recorded_at         TIMESTAMP   DEFAULT NOW()
+INSERT INTO usage_analytics (facility_id, booking_id, date, hour_of_day, day_of_week, duration_minutes, department_id) VALUES
+(
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Cyber Lab'),
+    (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-14 09:00:00'),
+    '2026-04-14', 9, 'Tuesday', 120,
+    (SELECT department_id FROM departments WHERE dept_code = 'CS')
+),
+(
+    (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-1'),
+    (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-14 11:00:00'),
+    '2026-04-14', 11, 'Tuesday', 120,
+    (SELECT department_id FROM departments WHERE dept_code = 'EE')
+),
+(
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Data Analytics Lab'),
+    (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-15 14:00:00'),
+    '2026-04-15', 14, 'Wednesday', 120,
+    (SELECT department_id FROM departments WHERE dept_code = 'CS')
+),
+(
+    (SELECT facility_id FROM facilities WHERE facility_name = 'Aga Khan Auditorium'),
+    (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-20 17:00:00'),
+    '2026-04-20', 17, 'Monday', 240,
+    (SELECT department_id FROM departments WHERE dept_code = 'CS')
+),
+(
+    (SELECT facility_id FROM facilities WHERE facility_name = 'LH-5'),
+    (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-16 08:00:00'),
+    '2026-04-16', 8, 'Thursday', 120,
+    (SELECT department_id FROM departments WHERE dept_code = 'ME')
 );
 
 
 -- ============================================================
--- INDEXES  (for performance on heavy queries)
--- ============================================================
-
--- Booking lookups by user and facility
-CREATE INDEX idx_booking_requests_user_id     ON booking_requests(user_id);
-CREATE INDEX idx_booking_requests_facility_id ON booking_requests(facility_id);
-CREATE INDEX idx_booking_requests_status      ON booking_requests(status);
-CREATE INDEX idx_booking_requests_time        ON booking_requests(start_time, end_time);
-
--- Approved bookings time range lookups (conflict detection)
-CREATE INDEX idx_approved_bookings_facility   ON approved_bookings(facility_id);
-CREATE INDEX idx_approved_bookings_time       ON approved_bookings(start_time, end_time);
-
--- Analytics queries
-CREATE INDEX idx_usage_analytics_facility     ON usage_analytics(facility_id);
-CREATE INDEX idx_usage_analytics_date         ON usage_analytics(date);
-CREATE INDEX idx_usage_analytics_dept         ON usage_analytics(department_id);
-
--- User lookups
-CREATE INDEX idx_users_role_id                ON users(role_id);
-CREATE INDEX idx_users_department_id          ON users(department_id);
-
--- Equipment by facility
-CREATE INDEX idx_equipment_facility_id        ON equipment(facility_id);
-
-
--- ============================================================
--- VIEWS
--- ============================================================
-
--- View 1: Active bookings with user and facility details
-CREATE OR REPLACE VIEW view_active_bookings AS
-SELECT
-    ab.booking_id,
-    u.full_name          AS booked_by,
-    r.role_name          AS user_role,
-    d.dept_name          AS department,
-    f.facility_name,
-    f.facility_type,
-    f.location,
-    ab.start_time,
-    ab.end_time,
-    ab.approved_at
-FROM approved_bookings ab
-JOIN users       u ON ab.user_id     = u.user_id
-JOIN roles       r ON u.role_id      = r.role_id
-JOIN facilities  f ON ab.facility_id = f.facility_id
-LEFT JOIN departments d ON u.department_id = d.department_id
-WHERE ab.end_time > NOW();
-
-
--- View 2: Facility utilization summary
-CREATE OR REPLACE VIEW view_facility_utilization AS
-SELECT
-    f.facility_id,
-    f.facility_name,
-    f.facility_type,
-    f.capacity,
-    COUNT(ua.analytics_id)          AS total_bookings,
-    COALESCE(SUM(ua.duration_minutes), 0) AS total_minutes_used,
-    ROUND(
-        COALESCE(SUM(ua.duration_minutes), 0) / NULLIF(
-            EXTRACT(EPOCH FROM (NOW() - MIN(ua.recorded_at))) / 60, 0
-        ) * 100, 2
-    )                               AS utilization_pct
-FROM facilities f
-LEFT JOIN usage_analytics ua ON f.facility_id = ua.facility_id
-GROUP BY f.facility_id, f.facility_name, f.facility_type, f.capacity;
-
-
--- View 3: Pending requests with requester info
-CREATE OR REPLACE VIEW view_pending_requests AS
-SELECT
-    br.request_id,
-    u.full_name      AS requested_by,
-    r.role_name      AS user_role,
-    d.dept_name      AS department,
-    f.facility_name,
-    f.location,
-    br.start_time,
-    br.end_time,
-    br.purpose,
-    br.attendees_count,
-    br.created_at
-FROM booking_requests br
-JOIN users      u ON br.user_id     = u.user_id
-JOIN roles      r ON u.role_id      = r.role_id
-JOIN facilities f ON br.facility_id = f.facility_id
-LEFT JOIN departments d ON u.department_id = d.department_id
-WHERE br.status = 'Pending'
-ORDER BY br.created_at ASC;
-
-
--- View 4: Peak hours per facility
-CREATE OR REPLACE VIEW view_peak_hours AS
-SELECT
-    f.facility_name,
-    ua.day_of_week,
-    ua.hour_of_day,
-    COUNT(*)  AS booking_count
-FROM usage_analytics ua
-JOIN facilities f ON ua.facility_id = f.facility_id
-GROUP BY f.facility_name, ua.day_of_week, ua.hour_of_day
-ORDER BY booking_count DESC;
-
-
--- ============================================================
--- CONFLICT DETECTION FUNCTION
--- Prevents double booking of the same facility
--- ============================================================
-
-CREATE OR REPLACE FUNCTION check_booking_conflict(
-    p_facility_id   INT,
-    p_start_time    TIMESTAMP,
-    p_end_time      TIMESTAMP
-)
-RETURNS BOOLEAN AS $$
-DECLARE
-    conflict_count INT;
-BEGIN
-    SELECT COUNT(*) INTO conflict_count
-    FROM approved_bookings
-    WHERE facility_id = p_facility_id
-      AND status_check = TRUE
-      AND (
-          (p_start_time >= start_time AND p_start_time < end_time) OR
-          (p_end_time > start_time AND p_end_time <= end_time)     OR
-          (p_start_time <= start_time AND p_end_time >= end_time)
-      );
-
-    RETURN conflict_count > 0;
-END;
-$$ LANGUAGE plpgsql;
-
-
--- ============================================================
--- TRIGGER: Auto-populate usage_analytics after booking approval
--- ============================================================
-
-CREATE OR REPLACE FUNCTION populate_usage_analytics()
-RETURNS TRIGGER AS $$
-BEGIN
-    INSERT INTO usage_analytics (
-        facility_id,
-        booking_id,
-        date,
-        hour_of_day,
-        day_of_week,
-        duration_minutes,
-        department_id
-    )
-    SELECT
-        NEW.facility_id,
-        NEW.booking_id,
-        DATE(NEW.start_time),
-        EXTRACT(HOUR FROM NEW.start_time)::INT,
-        TO_CHAR(NEW.start_time, 'Day'),
-        EXTRACT(EPOCH FROM (NEW.end_time - NEW.start_time))::INT / 60,
-        u.department_id
-    FROM users u
-    WHERE u.user_id = NEW.user_id;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_populate_analytics
-AFTER INSERT ON approved_bookings
-FOR EACH ROW
-EXECUTE FUNCTION populate_usage_analytics();
-
-
--- ============================================================
--- END OF SCHEMA
+-- END OF SEED DATA
 -- ============================================================
