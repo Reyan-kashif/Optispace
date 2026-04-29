@@ -151,8 +151,6 @@ CREATE TABLE usage_analytics (
     booking_id          INT         NOT NULL REFERENCES approved_bookings(booking_id) ON DELETE CASCADE,
     date                DATE        NOT NULL,
     hour_of_day         INT         CHECK (hour_of_day BETWEEN 0 AND 23),
-    day_of_week         VARCHAR(10),
-    -- 'Monday', 'Tuesday', etc.
     duration_minutes    INT         CHECK (duration_minutes > 0),
     department_id       INT         REFERENCES departments(department_id)            ON DELETE SET NULL,
     recorded_at         TIMESTAMP   DEFAULT NOW()
@@ -257,12 +255,12 @@ ORDER BY br.created_at ASC;
 CREATE OR REPLACE VIEW view_peak_hours AS
 SELECT
     f.facility_name,
-    ua.day_of_week,
+    TRIM(TO_CHAR(ua.date, 'Day')) AS day_of_week,
     ua.hour_of_day,
     COUNT(*)  AS booking_count
 FROM usage_analytics ua
 JOIN facilities f ON ua.facility_id = f.facility_id
-GROUP BY f.facility_name, ua.day_of_week, ua.hour_of_day
+GROUP BY f.facility_name, TRIM(TO_CHAR(ua.date, 'Day')), ua.hour_of_day
 ORDER BY booking_count DESC;
 
 
@@ -307,7 +305,6 @@ BEGIN
         booking_id,
         date,
         hour_of_day,
-        day_of_week,
         duration_minutes,
         department_id
     )
@@ -316,7 +313,6 @@ BEGIN
         NEW.booking_id,
         DATE(NEW.start_time),
         EXTRACT(HOUR FROM NEW.start_time)::INT,
-        TO_CHAR(NEW.start_time, 'Day'),
         EXTRACT(EPOCH FROM (NEW.end_time - NEW.start_time))::INT / 60,
         u.department_id
     FROM users u
