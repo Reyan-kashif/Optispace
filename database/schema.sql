@@ -281,7 +281,6 @@ BEGIN
     SELECT COUNT(*) INTO conflict_count
     FROM approved_bookings
     WHERE facility_id = p_facility_id
-      AND status_check = TRUE
       AND (
           (p_start_time >= start_time AND p_start_time < end_time) OR
           (p_end_time > start_time AND p_end_time <= end_time)     OR
