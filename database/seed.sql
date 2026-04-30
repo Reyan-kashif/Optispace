@@ -33,7 +33,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'System Admin',
     'admin@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Admin'),
     NULL,
     NULL,
@@ -45,7 +45,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Dr. Ahmed Khan',
     'ahmed.khan@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Faculty'),
     (SELECT department_id FROM departments WHERE dept_code = 'CS'),
     NULL,
@@ -55,7 +55,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Dr. Sara Malik',
     'sara.malik@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Faculty'),
     (SELECT department_id FROM departments WHERE dept_code = 'EE'),
     NULL,
@@ -65,7 +65,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Dr. Usman Tariq',
     'usman.tariq@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Faculty'),
     (SELECT department_id FROM departments WHERE dept_code = 'ME'),
     NULL,
@@ -77,7 +77,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Reyan Kashif',
     'reyan.kashif@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Student'),
     (SELECT department_id FROM departments WHERE dept_code = 'CS'),
     '2024538',
@@ -87,7 +87,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Ghazali Khan',
     'ghazali.khan@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Student'),
     (SELECT department_id FROM departments WHERE dept_code = 'CS'),
     '2024380',
@@ -97,7 +97,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Sohaib Bin Tausif',
     'sohaib.tausif@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Student'),
     (SELECT department_id FROM departments WHERE dept_code = 'CS'),
     '2024595',
@@ -107,7 +107,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Ali Hassan',
     'ali.hassan@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Student'),
     (SELECT department_id FROM departments WHERE dept_code = 'EE'),
     '2023112',
@@ -117,7 +117,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Zara Ahmed',
     'zara.ahmed@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Student'),
     (SELECT department_id FROM departments WHERE dept_code = 'ME'),
     '2023245',
@@ -129,7 +129,7 @@ INSERT INTO users (full_name, email, password_hash, role_id, department_id, reg_
 (
     'Hamza Rauf',
     'hamza.rauf@giki.edu.pk',
-    '$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uHlwMhj.i',
+    '$2b$10$XH5QWJx8mdR31K26RSdKJeEnrCqVS.FDL7dVd64iG6a8dNvOspzuu',
     (SELECT role_id FROM roles WHERE role_name = 'Society Head'),
     (SELECT department_id FROM departments WHERE dept_code = 'CS'),
     '2022401',
@@ -461,35 +461,35 @@ INSERT INTO approval_records (request_id, admin_id, action, remarks) VALUES
 -- In production this is handled by the trigger automatically
 -- ============================================================
 
-INSERT INTO usage_analytics (facility_id, booking_id, date, hour_of_day, day_of_week, duration_minutes, department_id) VALUES
+INSERT INTO usage_analytics (facility_id, booking_id, date, hour_of_day, duration_minutes, department_id) VALUES
 (
     (SELECT facility_id FROM facilities WHERE facility_name = 'Cyber Lab'),
     (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-14 09:00:00'),
-    '2026-04-14', 9, 'Tuesday', 120,
+    '2026-04-14', 9, 120,
     (SELECT department_id FROM departments WHERE dept_code = 'CS')
 ),
 (
     (SELECT facility_id FROM facilities WHERE facility_name = 'MLH-1'),
     (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-14 11:00:00'),
-    '2026-04-14', 11, 'Tuesday', 120,
+    '2026-04-14', 11, 120,
     (SELECT department_id FROM departments WHERE dept_code = 'EE')
 ),
 (
     (SELECT facility_id FROM facilities WHERE facility_name = 'Data Analytics Lab'),
     (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-15 14:00:00'),
-    '2026-04-15', 14, 'Wednesday', 120,
+    '2026-04-15', 14, 120,
     (SELECT department_id FROM departments WHERE dept_code = 'CS')
 ),
 (
     (SELECT facility_id FROM facilities WHERE facility_name = 'Aga Khan Auditorium'),
     (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-20 17:00:00'),
-    '2026-04-20', 17, 'Monday', 240,
+    '2026-04-20', 17, 240,
     (SELECT department_id FROM departments WHERE dept_code = 'CS')
 ),
 (
     (SELECT facility_id FROM facilities WHERE facility_name = 'LH-5'),
     (SELECT booking_id FROM approved_bookings WHERE start_time = '2026-04-16 08:00:00'),
-    '2026-04-16', 8, 'Thursday', 120,
+    '2026-04-16', 8, 120,
     (SELECT department_id FROM departments WHERE dept_code = 'ME')
 );
 
