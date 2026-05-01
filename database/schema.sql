@@ -264,33 +264,6 @@ GROUP BY f.facility_name, TRIM(TO_CHAR(ua.date, 'Day')), ua.hour_of_day
 ORDER BY booking_count DESC;
 
 
--- ============================================================
--- CONFLICT DETECTION FUNCTION
--- Prevents double booking of the same facility
--- ============================================================
-
-CREATE OR REPLACE FUNCTION check_booking_conflict(
-    p_facility_id   INT,
-    p_start_time    TIMESTAMP,
-    p_end_time      TIMESTAMP
-)
-RETURNS BOOLEAN AS $$
-DECLARE
-    conflict_count INT;
-BEGIN
-    SELECT COUNT(*) INTO conflict_count
-    FROM approved_bookings
-    WHERE facility_id = p_facility_id
-      AND (
-          (p_start_time >= start_time AND p_start_time < end_time) OR
-          (p_end_time > start_time AND p_end_time <= end_time)     OR
-          (p_start_time <= start_time AND p_end_time >= end_time)
-      );
-
-    RETURN conflict_count > 0;
-END;
-$$ LANGUAGE plpgsql;
-
 
 -- ============================================================
 -- TRIGGER: Auto-populate usage_analytics after booking approval
