@@ -26,6 +26,11 @@ export default function BookingHistory() {
       setLoading(false);
     }
   };
+
+  const filtered = filter === 'All'
+    ? bookings
+    : bookings.filter((b) => b.status === filter);
+
   return (
     <div className="flex min-h-screen">
       <Sidebar />
