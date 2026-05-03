@@ -84,6 +84,26 @@ function AdminDashboardContent() {
   );
 }
 
+function RecentActivity() {
+  const [activity, setActivity] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchActivity();
+  }, []);
+
+  const fetchActivity = async () => {
+    try {
+      const res = await api.get('/bookings/history');
+      if (res.data.success) {
+        setActivity(Array.isArray(res.data.data) ? res.data.data.slice(0, 5) : []);
+      }
+    } catch {
+      // silently fail for dashboard widget
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) return <p className="text-sm text-gray-400">Loading activity...</p>;
   if (activity.length === 0) return null;
@@ -125,7 +145,7 @@ function AdminDashboardContent() {
       </div>
     </div>
   );
-
+}
 
 function UserDashboardContent() {
   const [bookings, setBookings] = useState([]);
