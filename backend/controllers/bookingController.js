@@ -229,11 +229,77 @@ const approveBooking = async (req, res) => {
   }
 };
 
+const rejectBooking = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const { remarks } = req.body;
+
+    // Verify the request exists and is pending
+    const requestResult = await client.query(bookingQueries.getBookingRequestById, [id]);
+
+    if (requestResult.rows.length === 0) {
+      client.release();
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: 'Booking request not found.',
+      });
+    }
+
+    const request = requestResult.rows[0];
+
+    if (request.status !== 'Pending') {
+      client.release();
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: `Cannot reject a request with status: ${request.status}.`,
+      });
+    }
+
+    // T2 Transaction: Reject booking
+    await client.query('BEGIN');
+
+    // Step 1: Update booking_requests status to Rejected
+    await client.query(bookingQueries.updateBookingStatus, ['Rejected', id]);
+
+    // Step 2: Insert approval record
+    await client.query(bookingQueries.insertApprovalRecord, [
+      id,
+      req.user.user_id,
+      'Rejected',
+      remarks || null,
+    ]);
+
+    await client.query('COMMIT');
+    client.release();
+
+    return res.status(200).json({
+      success: true,
+      data: { request_id: parseInt(id), status: 'Rejected' },
+      message: 'Booking rejected successfully.',
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    client.release();
+    console.error('RejectBooking error:', err);
+    return res.status(500).json({
+      success: false,
+      data: null,
+      message: 'Internal server error. Transaction rolled back.',
+    });
+  }
+};
+
 module.exports = {
   getMyBookings,
   getPendingRequests,
   getActiveBookings,
   createBooking,
   approveBooking,
+  rejectBooking,
 };
+
 
