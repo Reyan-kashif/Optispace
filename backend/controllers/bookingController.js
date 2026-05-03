@@ -145,9 +145,95 @@ const createBooking = async (req, res) => {
   }
 };
 
+const approveBooking = async (req, res) => {
+  const client = await pool.connect();
+
+  try {
+    const { id } = req.params;
+    const { remarks } = req.body;
+
+    // Verify the request exists and is pending
+    const requestResult = await client.query(bookingQueries.getBookingRequestById, [id]);
+
+    if (requestResult.rows.length === 0) {
+      client.release();
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: 'Booking request not found.',
+      });
+    }
+
+    const request = requestResult.rows[0];
+
+    if (request.status !== 'Pending') {
+      client.release();
+      return res.status(400).json({
+        success: false,
+        data: null,
+        message: `Cannot approve a request with status: ${request.status}.`,
+      });
+    }
+
+    // T1 Transaction: Approve booking
+    await client.query('BEGIN');
+
+    // Re-check for conflicts inside the transaction to prevent race conditions
+    const conflictResult = await client.query(bookingQueries.checkConflict, [
+      request.facility_id,
+      request.start_time,
+      request.end_time,
+    ]);
+
+    if (conflictResult.rows.length > 0) {
+      await client.query('ROLLBACK');
+      client.release();
+      return res.status(409).json({
+        success: false,
+        data: { conflicts: conflictResult.rows },
+        message: 'Time slot conflict. Another booking was approved for this period.',
+      });
+    }
+
+    // Step 1: Update booking_requests status to Approved
+    await client.query(bookingQueries.updateBookingStatus, ['Approved', id]);
+
+    // Step 2: Insert into approved_bookings from booking_requests
+    const approvedResult = await client.query(bookingQueries.insertApprovedBooking, [id]);
+
+    // Step 3: Insert approval record
+    await client.query(bookingQueries.insertApprovalRecord, [
+      id,
+      req.user.user_id,
+      'Approved',
+      remarks || null,
+    ]);
+
+    await client.query('COMMIT');
+    client.release();
+
+    return res.status(200).json({
+      success: true,
+      data: approvedResult.rows[0],
+      message: 'Booking approved successfully.',
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    client.release();
+    console.error('ApproveBooking error:', err);
+    return res.status(500).json({
+      success: false,
+      data: null,
+      message: 'Internal server error. Transaction rolled back.',
+    });
+  }
+};
+
 module.exports = {
   getMyBookings,
   getPendingRequests,
   getActiveBookings,
   createBooking,
+  approveBooking,
 };
+
