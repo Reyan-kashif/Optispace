@@ -293,6 +293,54 @@ const rejectBooking = async (req, res) => {
   }
 };
 
+const cancelBooking = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await pool.query(bookingQueries.cancelBookingRequest, [id, req.user.user_id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        data: null,
+        message: 'Booking request not found, not yours, or not in Pending status.',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: result.rows[0],
+      message: 'Booking request cancelled successfully.',
+    });
+  } catch (err) {
+    console.error('CancelBooking error:', err);
+    return res.status(500).json({
+      success: false,
+      data: null,
+      message: 'Internal server error.',
+    });
+  }
+};
+
+const getBookingHistory = async (req, res) => {
+  try {
+    const result = await pool.query(bookingQueries.getBookingHistory);
+
+    return res.status(200).json({
+      success: true,
+      data: result.rows,
+      message: 'Booking history retrieved successfully.',
+    });
+  } catch (err) {
+    console.error('GetBookingHistory error:', err);
+    return res.status(500).json({
+      success: false,
+      data: null,
+      message: 'Internal server error.',
+    });
+  }
+};
+
 module.exports = {
   getMyBookings,
   getPendingRequests,
@@ -300,6 +348,6 @@ module.exports = {
   createBooking,
   approveBooking,
   rejectBooking,
+  cancelBooking,
+  getBookingHistory,
 };
-
-
