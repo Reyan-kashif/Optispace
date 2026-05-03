@@ -184,7 +184,107 @@ export default function Recommendations() {
 
             {slotsLoading && <p className="text-gray-500 text-sm">Loading...</p>}
 
-          
+            {selectedFacility && !slotsLoading && (
+              <div className="space-y-6">
+                <div>
+                  <h4 className="text-sm font-semibold text-[#1f2937] mb-2">Best Available Time Slots (Never Booked Hours)</h4>
+                  <div className="border border-[#e5e7eb] rounded-lg overflow-hidden">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-gray-50 border-b border-[#e5e7eb]">
+                        <tr>
+                          <th className="px-4 py-3 font-medium text-gray-500">Hour</th>
+                          <th className="px-4 py-3 font-medium text-gray-500">Time of Day</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bestSlots.length === 0 ? (
+                          <tr>
+                            <td colSpan={2} className="px-4 py-6 text-center text-gray-400">All hours have been booked</td>
+                          </tr>
+                        ) : (
+                          bestSlots.map((slot, i) => (
+                            <tr key={i} className="border-b border-[#e5e7eb]">
+                              <td className="px-4 py-3 font-medium text-[#1f2937]">
+                                {slot.hour_slot}:00
+                              </td>
+                              <td className="px-4 py-3 text-gray-600">
+                                {slot.time_of_day}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold text-[#1f2937] mb-2">Similar Facilities</h4>
+                  <div className="border border-[#e5e7eb] rounded-lg overflow-hidden">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-gray-50 border-b border-[#e5e7eb]">
+                        <tr>
+                          <th className="px-4 py-3 font-medium text-gray-500">Facility</th>
+                          <th className="px-4 py-3 font-medium text-gray-500">Type</th>
+                          <th className="px-4 py-3 font-medium text-gray-500">Capacity</th>
+                          <th className="px-4 py-3 font-medium text-gray-500">Location</th>
+                          <th className="px-4 py-3 font-medium text-gray-500">Times Booked</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {similar.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="px-4 py-6 text-center text-gray-400">No similar facilities found</td>
+                          </tr>
+                        ) : (
+                          similar.map((f, i) => (
+                            <tr key={i} className="border-b border-[#e5e7eb]">
+                              <td className="px-4 py-3 font-medium text-[#1f2937]">{f.facility_name}</td>
+                              <td className="px-4 py-3 text-gray-600">{f.facility_type}</td>
+                              <td className="px-4 py-3 text-gray-600">{f.capacity}</td>
+                              <td className="px-4 py-3 text-gray-600">{f.location}</td>
+                              <td className="px-4 py-3 text-gray-600">{f.times_booked}</td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="text-sm font-semibold text-[#1f2937] mb-2">Next Available 2-Hour Slots</h4>
+                  <div className="border border-[#e5e7eb] rounded-lg overflow-hidden">
+                    <table className="w-full text-sm text-left">
+                      <thead className="bg-gray-50 border-b border-[#e5e7eb]">
+                        <tr>
+                          <th className="px-4 py-3 font-medium text-gray-500">Start</th>
+                          <th className="px-4 py-3 font-medium text-gray-500">End</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {nextSlots.length === 0 ? (
+                          <tr>
+                            <td colSpan={2} className="px-4 py-6 text-center text-gray-400">No available slots found today</td>
+                          </tr>
+                        ) : (
+                          nextSlots.map((slot, i) => (
+                            <tr key={i} className="border-b border-[#e5e7eb]">
+                              <td className="px-4 py-3 font-medium text-[#1f2937]">
+                                {new Date(slot.slot_start).toLocaleString()}
+                              </td>
+                              <td className="px-4 py-3 text-gray-600">
+                                {new Date(slot.slot_end).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
           </section>
         </main>
       </div>
