@@ -78,6 +78,7 @@ function AdminDashboardContent() {
                     </div>
                 ))}
             </div>
+
             <RecentActivity />
         </div>
     );
@@ -98,6 +99,7 @@ function RecentActivity() {
                 setActivity(Array.isArray(res.data.data) ? res.data.data.slice(0, 5) : []);
             }
         } catch {
+            // silently fail for dashboard widget
         } finally {
             setLoading(false);
         }
@@ -174,6 +176,9 @@ function UserDashboardContent() {
     const upcoming = bookings.filter(
         (b) => b.status === 'Approved' && new Date(b.start_time) > new Date()
     );
+    const nextBooking = upcoming.length > 0
+        ? upcoming.sort((a, b) => new Date(a.start_time) - new Date(b.start_time))[0]
+        : null;
 
     const statCards = [
         { label: 'Total Bookings', value: bookings.length, color: 'border-l-[#2563eb]' },
@@ -191,6 +196,54 @@ function UserDashboardContent() {
                         <p className="text-2xl font-bold text-[#1f2937]">{card.value}</p>
                     </div>
                 ))}
+            </div>
+
+            {nextBooking && (
+                <div className="border border-[#e5e7eb] border-l-4 border-l-[#2563eb] rounded-lg p-5 shadow-sm bg-blue-50/30">
+                    <h3 className="text-sm font-semibold text-[#1f2937] mb-2">Next Upcoming Booking</h3>
+                    <div className="flex items-start justify-between">
+                        <div>
+                            <p className="text-base font-medium text-[#1f2937]">{nextBooking.facility_name}</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                                {new Date(nextBooking.start_time).toLocaleString()} &mdash; {new Date(nextBooking.end_time).toLocaleString()}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">{nextBooking.purpose}</p>
+                        </div>
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-xs font-medium bg-green-100 text-green-700">
+                            Approved
+                        </span>
+                    </div>
+                </div>
+            )}
+
+            <div>
+                <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-base font-semibold text-[#1f2937]">Recent Bookings</h3>
+                    <Link
+                        to="/book"
+                        className="inline-block bg-[#2563eb] text-white text-sm font-medium px-4 py-2 rounded hover:bg-blue-700"
+                    >
+                        Book a Facility
+                    </Link>
+                </div>
+
+                {bookings.length === 0 ? (
+                    <div className="border border-[#e5e7eb] rounded-lg p-8 text-center">
+                        <p className="text-gray-400 mb-3">No bookings yet</p>
+                        <Link
+                            to="/book"
+                            className="text-sm text-[#2563eb] hover:text-blue-700 font-medium"
+                        >
+                            Book your first facility
+                        </Link>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {bookings.slice(0, 6).map((b) => (
+                            <BookingCard key={b.request_id} booking={b} />
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
