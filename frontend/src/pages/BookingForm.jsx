@@ -18,6 +18,7 @@ export default function BookingForm() {
     const [endTime, setEndTime] = useState('');
     const [purpose, setPurpose] = useState('');
     const [loading, setLoading] = useState(false);
+    const [attendeesCount, setAttendeesCount] = useState('');
 
     useEffect(() => {
         fetchFacilities();
@@ -41,7 +42,7 @@ export default function BookingForm() {
         setError('');
         setSuccess('');
 
-        if (!facilityId || !startTime || !endTime || !purpose) {
+        if (!facilityId || !startTime || !endTime || !purpose || !attendeesCount) {
             setError('All fields are required');
             return;
         }
@@ -81,6 +82,7 @@ export default function BookingForm() {
                 start_time: startTime,
                 end_time: endTime,
                 purpose,
+                attendees_count: Number(attendeesCount),
             });
 
             if (res.data.success) {
@@ -161,6 +163,7 @@ export default function BookingForm() {
                                     </>
                                 )}
                             </div>
+
                             <div>
                                 <label className="block text-sm font-medium text-[#1f2937] mb-1">
                                     Start Date &amp; Time
@@ -200,6 +203,33 @@ export default function BookingForm() {
                                     placeholder="Describe the purpose of your booking"
                                 />
                             </div>
+
+                            <div>
+                                <label className="block text-sm font-medium text-[#1f2937] mb-1">
+                                    Number of Attendees
+                                </label>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    value={attendeesCount}
+                                    onChange={(e) => setAttendeesCount(e.target.value)}
+                                    required
+                                    className="w-full border border-[#e5e7eb] rounded px-3 py-2 text-sm focus:outline-none focus:border-[#2563eb]"
+                                    placeholder="e.g. 30"
+                                />
+                                {facilityId && attendeesCount && (() => {
+                                    const selected = facilities.find((f) => String(f.facility_id) === String(facilityId));
+                                    if (selected && Number(attendeesCount) > selected.capacity) {
+                                        return (
+                                            <p className="mt-1 text-xs text-amber-600">
+                                                Warning: Attendees ({attendeesCount}) exceed facility capacity ({selected.capacity})
+                                            </p>
+                                        );
+                                    }
+                                    return null;
+                                })()}
+                            </div>
+
                             <button
                                 type="submit"
                                 disabled={loading}
