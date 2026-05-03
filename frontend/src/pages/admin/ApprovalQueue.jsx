@@ -16,7 +16,18 @@ export default function ApprovalQueue() {
     fetchPending();
   }, []);
 
-
+  const fetchPending = async () => {
+    try {
+      const res = await api.get('/bookings/pending');
+      if (res.data.success) {
+        setBookings(Array.isArray(res.data.data) ? res.data.data : []);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load pending bookings');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleApprove = async (requestId) => {
     setActionLoading(requestId);
